@@ -12,7 +12,7 @@ import org.jetbrains.exposed.sql.selectAll
 
 interface TechnologyRepository {
 
-    suspend fun addIfNotExists(technology: TechnologyRequest): Result<Int?>
+    suspend fun insertIfNotExists(technology: TechnologyRequest): Result<Int?>
     suspend fun selectById(id: Int): Result<ResultRow?>
     suspend fun selectByName(name: String): Result<ResultRow?>
     suspend fun selectAll(): Result<List<ResultRow>>
@@ -20,7 +20,7 @@ interface TechnologyRepository {
 
 class TechnologyRepositoryImpl(private val dbTransaction: DbTransaction) : TechnologyRepository {
 
-    override suspend fun addIfNotExists(technology: TechnologyRequest): Result<Int?> {
+    override suspend fun insertIfNotExists(technology: TechnologyRequest): Result<Int?> {
         return dbTransaction.dbQuery {
             resultOf {
                 Technologies.select(Technologies.value eq technology.value)

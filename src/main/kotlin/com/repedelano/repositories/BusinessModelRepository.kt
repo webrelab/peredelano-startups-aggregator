@@ -13,7 +13,7 @@ import org.jetbrains.exposed.sql.update
 
 interface BusinessModelRepository {
 
-    suspend fun add(businessModel: BusinessModelRequest): Result<Int?>
+    suspend fun insert(businessModel: BusinessModelRequest): Result<Int?>
     suspend fun selectById(id: Int): Result<ResultRow?>
     suspend fun selectByName(name: String): Result<ResultRow?>
     suspend fun selectAll(): Result<List<ResultRow>>
@@ -22,7 +22,7 @@ interface BusinessModelRepository {
 
 class BusinessModelRepositoryImpl(private val dbTransaction: DbTransaction) : BusinessModelRepository {
 
-    override suspend fun add(businessModel: BusinessModelRequest): Result<Int?> {
+    override suspend fun insert(businessModel: BusinessModelRequest): Result<Int?> {
         return dbTransaction.dbQuery {
             resultOf {
                 BusinessModels.insertIgnoreAndGetId {

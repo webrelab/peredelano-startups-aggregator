@@ -22,7 +22,7 @@ fun addIdeaUseCase(
     ideaService: IdeaService
 ) = AddIdeaUseCase { ideaRequest ->
     withContext(dispatcher) {
-        ideaService.add(ideaRequest)
+        ideaService.insert(ideaRequest)
     }
 }
 

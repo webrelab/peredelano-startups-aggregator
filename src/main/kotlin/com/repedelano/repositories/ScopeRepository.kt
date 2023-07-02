@@ -14,7 +14,7 @@ import org.jetbrains.exposed.sql.update
 
 interface ScopeRepository {
 
-    suspend fun addIfNotExists(scope: ScopeRequest): Result<Int?>
+    suspend fun insertIfNotExists(scope: ScopeRequest): Result<Int?>
     suspend fun selectById(id: Int): Result<ResultRow?>
     suspend fun selectByName(name: String): Result<ResultRow?>
     suspend fun selectAll(): Result<List<ResultRow>>
@@ -23,7 +23,7 @@ interface ScopeRepository {
 
 class ScopeRepositoryImpl(private val dbTransaction: DbTransaction) : ScopeRepository {
 
-    override suspend fun addIfNotExists(scope: ScopeRequest): Result<Int?> {
+    override suspend fun insertIfNotExists(scope: ScopeRequest): Result<Int?> {
         return dbTransaction.dbQuery {
             resultOf {
                 Scopes.select(Scopes.value eq scope.value).map { it.toScope().id }.firstOrNull()

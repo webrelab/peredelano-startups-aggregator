@@ -12,7 +12,7 @@ import org.jetbrains.exposed.sql.select
 
 interface VacancyTechnologiesRepository {
 
-    suspend fun add(vacancyId: Int, technologyId: Int): Result<Boolean>
+    suspend fun insert(vacancyId: Int, technologyId: Int): Result<Boolean>
     suspend fun selectByTechnologyId(technologyId: Int): Result<List<ResultRow>>
     suspend fun selectByTechnologyIds(technologyIds: List<Int>): Result<List<ResultRow>>
     suspend fun delete(vacancyId: Int): Result<Boolean>
@@ -20,7 +20,7 @@ interface VacancyTechnologiesRepository {
 
 class VacancyTechnologiesRepositoryImpl(private val dbTransaction: DbTransaction) : VacancyTechnologiesRepository {
 
-    override suspend fun add(vacancyId: Int, technologyId: Int): Result<Boolean> {
+    override suspend fun insert(vacancyId: Int, technologyId: Int): Result<Boolean> {
         return dbTransaction.dbQuery {
             resultOf {
                 VacancyTechnologies.insert {

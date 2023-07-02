@@ -18,7 +18,7 @@ import java.util.UUID
 
 interface IdeaRepository {
 
-    suspend fun add(idea: IdeaRequest): Result<UUID?>
+    suspend fun insert(idea: IdeaRequest): Result<UUID?>
     suspend fun selectById(id: UUID): Result<ResultRow?>
     suspend fun selectAll(): Result<List<ResultRow>>
     suspend fun update(id: UUID, idea: IdeaRequest): Result<Boolean>
@@ -28,7 +28,7 @@ interface IdeaRepository {
 
 class IdeaRepositoryImpl(private val dbTransaction: DbTransaction) : IdeaRepository {
 
-    override suspend fun add(idea: IdeaRequest): Result<UUID?> {
+    override suspend fun insert(idea: IdeaRequest): Result<UUID?> {
         return dbTransaction.dbQuery {
             resultOf {
                 val currentTime = Instant.now()

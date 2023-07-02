@@ -14,15 +14,15 @@ import java.util.UUID
 
 interface IdeaTechnologiesRepository {
 
-    suspend fun add(ideaId: UUID, technologyId: Int): Result<Boolean>
-    suspend fun add(ideaId: UUID, technologyName: String): Result<Boolean>
+    suspend fun insert(ideaId: UUID, technologyId: Int): Result<Boolean>
+    suspend fun insert(ideaId: UUID, technologyName: String): Result<Boolean>
     suspend fun selectByIdeaId(ideaId: UUID): Result<List<ResultRow>>
     suspend fun delete(ideaId: UUID): Result<Boolean>
 }
 
 class IdeaTechnologiesRepositoryImpl(private val dbTransaction: DbTransaction) : IdeaTechnologiesRepository {
 
-    override suspend fun add(ideaId: UUID, technologyId: Int): Result<Boolean> {
+    override suspend fun insert(ideaId: UUID, technologyId: Int): Result<Boolean> {
         return dbTransaction.dbQuery {
             resultOf {
                 IdeaTechnologies.insert {
@@ -33,7 +33,7 @@ class IdeaTechnologiesRepositoryImpl(private val dbTransaction: DbTransaction) :
         }
     }
 
-    override suspend fun add(ideaId: UUID, technologyName: String): Result<Boolean> {
+    override suspend fun insert(ideaId: UUID, technologyName: String): Result<Boolean> {
         return dbTransaction.dbQuery {
             resultOf {
                 IdeaTechnologies.insert {

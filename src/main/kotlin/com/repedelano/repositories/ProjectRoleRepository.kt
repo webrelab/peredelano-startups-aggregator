@@ -12,7 +12,7 @@ import org.jetbrains.exposed.sql.selectAll
 
 interface ProjectRoleRepository {
 
-    suspend fun add(projectRole: ProjectRoleRequest): Result<Int?>
+    suspend fun insert(projectRole: ProjectRoleRequest): Result<Int?>
     suspend fun selectById(id: Int): Result<ResultRow?>
     suspend fun selectByName(name: String): Result<ResultRow?>
     suspend fun selectAll(): Result<List<ResultRow>>
@@ -20,7 +20,7 @@ interface ProjectRoleRepository {
 
 class ProjectRoleRepositoryImpl(private val dbTransaction: DbTransaction) : ProjectRoleRepository {
 
-    override suspend fun add(projectRole: ProjectRoleRequest): Result<Int?> {
+    override suspend fun insert(projectRole: ProjectRoleRequest): Result<Int?> {
         return dbTransaction.dbQuery {
             resultOf {
                 ProjectRoles.insertIgnoreAndGetId {
