@@ -10,11 +10,11 @@ import com.repedelano.repositories.ScopeRepository
 
 interface ScopeService {
 
-    suspend fun addIfNotExists(scope: ScopeRequest): Result<ScopeResponse>
-    suspend fun selectById(id: Int): Result<ScopeResponse>
-    suspend fun selectByName(name: String): Result<ScopeResponse>
+    suspend fun addIfNotExists(scope: ScopeRequest): Result<ScopeResponse?>
+    suspend fun selectById(id: Int): Result<ScopeResponse?>
+    suspend fun search(query: String): Result<ScopeResponseList>
     suspend fun selectAll(): Result<ScopeResponseList>
-    suspend fun update(scopeId: Int, scope: ScopeRequest): Result<Boolean>
+    suspend fun update(id: Int, scope: ScopeRequest): Result<ScopeResponse?>
 }
 
 class ScopeServiceImpl(private val scopeRepository: ScopeRepository) : ScopeService {
@@ -23,13 +23,19 @@ class ScopeServiceImpl(private val scopeRepository: ScopeRepository) : ScopeServ
         scopeRepository.insertIfNotExists(scope).flatMap { selectById(it!!) }
 
     override suspend fun selectById(id: Int) =
-        scopeRepository.selectById(id).map { it!!.toScope() }
+        scopeRepository.selectById(id).map { it?.toScope() }
 
-    override suspend fun selectByName(name: String) =
-        scopeRepository.selectByName(name).map { it!!.toScope() }
+    override suspend fun search(query: String) =
+        scopeRepository.search(query).map {list ->
+            list.map { it.toScope() }.toScopeResponseList()
+        }
 
     override suspend fun selectAll() =
-        scopeRepository.selectAll().map { list -> list.map { it.toScope() }.toScopeResponseList() }
+        scopeRepository.selectAll().map { list ->
+            list.map { it.toScope() }.toScopeResponseList()
+        }
 
-    override suspend fun update(scopeId: Int, scope: ScopeRequest) = scopeRepository.update(scopeId, scope)
+    override suspend fun update(id: Int, scope: ScopeRequest) =
+        scopeRepository.update(id, scope)
+            .flatMap { selectById(id) }
 }

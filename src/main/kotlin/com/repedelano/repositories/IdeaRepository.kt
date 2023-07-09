@@ -5,10 +5,11 @@ import com.repedelano.dtos.idea.IdeaStage
 import com.repedelano.dtos.idea.IdeaStatus
 import com.repedelano.orm.idea.Ideas
 import com.repedelano.resultOf
+import com.repedelano.services.IdeaStatusHandler
 import com.repedelano.utils.db.DbTransaction
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.insertIgnoreAndGetId
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
@@ -32,11 +33,12 @@ class IdeaRepositoryImpl(private val dbTransaction: DbTransaction) : IdeaReposit
         return dbTransaction.dbQuery {
             resultOf {
                 val currentTime = Instant.now()
-                Ideas.insertIgnoreAndGetId(createBody(idea) {
+                Ideas.insertAndGetId (createBody(idea) {
                     it[created] = currentTime
                     it[updated] = currentTime
+                    it[status] = IdeaStatusHandler.getStatus(idea)
                     it[stage] = IdeaStage.OPEN
-                })?.value
+                }).value
             }
         }
     }
@@ -96,7 +98,6 @@ class IdeaRepositoryImpl(private val dbTransaction: DbTransaction) : IdeaReposit
             it[owner] = idea.owner
             it[title] = idea.title
             it[tgLink] = idea.tgLink
-            it[boostyLink] = idea.boostyLink
             it[isFavorite] = false
             it[problem] = idea.problem
             it[description] = idea.description

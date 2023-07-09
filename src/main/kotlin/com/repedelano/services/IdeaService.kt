@@ -23,12 +23,12 @@ import java.util.UUID
 
 interface IdeaService {
 
-    suspend fun insert(idea: IdeaRequest): Result<IdeaResponse>
-    suspend fun selectById(id: UUID): Result<IdeaResponse>
+    suspend fun insert(idea: IdeaRequest): Result<IdeaResponse?>
+    suspend fun selectById(id: UUID): Result<IdeaResponse?>
     suspend fun selectPage(pager: Pager): Result<IdeaResponseList>
-    suspend fun update(id: UUID, idea: IdeaRequest): Result<IdeaResponse>
+    suspend fun update(id: UUID, idea: IdeaRequest): Result<IdeaResponse?>
     suspend fun updateStatus(id: UUID, vacancies: Int): Result<Boolean>
-    suspend fun updateStage(id: UUID, stage: IdeaStage): Result<IdeaResponse>
+    suspend fun updateStage(id: UUID, stage: IdeaStage): Result<IdeaResponse?>
 }
 
 class IdeaServiceImpl(
@@ -89,7 +89,7 @@ class IdeaServiceImpl(
             .flatMap { ideaScopesRepository.selectBuIdeaId(idea.id) }
             .map { list -> idea.scopes.addAll(list.map { it.toScope() }) }
             .flatMap { ideaBusinessModelsRepository.selectByIdeaId(idea.id) }
-            .map { list -> idea.businessModel.addAll(list.map { it.toBusinessModel() }) }
+            .map { list -> idea.businessModels.addAll(list.map { it.toBusinessModel() }) }
             .flatMap { ideaTechnologiesRepository.selectByIdeaId(idea.id) }
             .map { list -> idea.techStack.addAll(list.map { it.toTechnology() }) }
 
@@ -106,7 +106,7 @@ class IdeaServiceImpl(
                 ideaScopesRepository.insert(ideaId, scopeName)
             }
         }
-        idea.businessModel?.forEach { bmName ->
+        idea.businessModels?.forEach { bmName ->
             result = result.flatMap {
                 ideaBusinessModelsRepository.insert(ideaId, bmName)
             }

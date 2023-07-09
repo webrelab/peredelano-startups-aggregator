@@ -10,10 +10,11 @@ import com.repedelano.repositories.TechnologyRepository
 
 interface TechnologyService {
 
-    suspend fun insertIfNotExists(technology: TechnologyRequest): Result<TechnologyResponse>
-    suspend fun selectById(id: Int): Result<TechnologyResponse>
-    suspend fun selectByName(name: String): Result<TechnologyResponse>
+    suspend fun insertIfNotExists(technology: TechnologyRequest): Result<TechnologyResponse?>
+    suspend fun selectById(id: Int): Result<TechnologyResponse?>
+    suspend fun selectByName(name: String): Result<TechnologyResponse?>
     suspend fun selectAll(): Result<TechnologyResponseList>
+    suspend fun update(id: Int, technology: TechnologyRequest): Result<TechnologyResponse?>
 }
 
 class TechnologyServiceImpl(
@@ -33,4 +34,8 @@ class TechnologyServiceImpl(
         technologyRepository.selectAll().map { list ->
             list.map { it.toTechnology() }.toTechnologyResponseList()
         }
+
+    override suspend fun update(id: Int, technology: TechnologyRequest) =
+        technologyRepository.update(id, technology)
+            .flatMap { selectById(id) }
 }

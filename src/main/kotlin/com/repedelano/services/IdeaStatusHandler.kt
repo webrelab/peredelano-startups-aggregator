@@ -15,7 +15,7 @@ object IdeaStatusHandler {
                 stage == IdeaStage.DONE || stage == IdeaStage.DECLINED -> IdeaStatus.PROJECT_CLOSED
                 isBlank(description) -> IdeaStatus.SEARCH_SOLUTION
                 isBlank(scopes) || isBlank(similarProjects, targetAudience, marketResearch) -> IdeaStatus.COLLECT_SOCIO_ECONOMIC_INFO
-                isBlank(businessModel) || isBlank(businessPlan) -> IdeaStatus.FINANCIAL_JUSTIFICATION_REQUIRED
+                isBlank(businessModels) || isBlank(businessPlan) -> IdeaStatus.FINANCIAL_JUSTIFICATION_REQUIRED
                 isBlank(techStack) || isBlank(resources) -> IdeaStatus.SEARCH_TECHNOLOGICAL_SOLUTION
                 vacanciesTotal > 0 -> IdeaStatus.SEARCH_PARTICIPANTS
                 else -> IdeaStatus.MVP_DEVELOPMENT
@@ -29,7 +29,7 @@ object IdeaStatusHandler {
                 stage == IdeaStage.DONE || stage == IdeaStage.DECLINED -> IdeaStatus.PROJECT_CLOSED
                 isBlank(description) -> IdeaStatus.SEARCH_SOLUTION
                 isBlank(scopes) || isBlank(similarProjects, targetAudience, marketResearch) -> IdeaStatus.COLLECT_SOCIO_ECONOMIC_INFO
-                isBlank(businessModel) || isBlank(businessPlan) -> IdeaStatus.FINANCIAL_JUSTIFICATION_REQUIRED
+                isBlank(businessModels) || isBlank(businessPlan) -> IdeaStatus.FINANCIAL_JUSTIFICATION_REQUIRED
                 isBlank(techStack) || isBlank(resources) -> IdeaStatus.SEARCH_TECHNOLOGICAL_SOLUTION
                 vacanciesTotal > 0 -> IdeaStatus.SEARCH_PARTICIPANTS
                 else -> IdeaStatus.MVP_DEVELOPMENT

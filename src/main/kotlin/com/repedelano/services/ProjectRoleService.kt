@@ -10,10 +10,11 @@ import com.repedelano.repositories.ProjectRoleRepository
 
 interface ProjectRoleService {
 
-    suspend fun add(projectRole: ProjectRoleRequest): Result<ProjectRoleResponse>
-    suspend fun selectById(id: Int): Result<ProjectRoleResponse>
-    suspend fun selectByName(name: String): Result<ProjectRoleResponse>
+    suspend fun add(projectRole: ProjectRoleRequest): Result<ProjectRoleResponse?>
+    suspend fun selectById(id: Int): Result<ProjectRoleResponse?>
+    suspend fun search(query: String): Result<ProjectRoleResponseList>
     suspend fun selectAll(): Result<ProjectRoleResponseList>
+    suspend fun update(id: Int, projectRole: ProjectRoleRequest): Result<ProjectRoleResponse?>
 }
 
 class ProjectRoleServiceImpl(private val projectRoleRepository: ProjectRoleRepository) : ProjectRoleService {
@@ -24,11 +25,17 @@ class ProjectRoleServiceImpl(private val projectRoleRepository: ProjectRoleRepos
     override suspend fun selectById(id: Int) =
         projectRoleRepository.selectById(id).map { it!!.toProjectRoleResponse() }
 
-    override suspend fun selectByName(name: String) =
-        projectRoleRepository.selectByName(name).map { it!!.toProjectRoleResponse() }
+    override suspend fun search(query: String) =
+        projectRoleRepository.search(query).map { list ->
+            list.map { it.toProjectRoleResponse() }.toProjectRoleResponseList()
+        }
 
     override suspend fun selectAll() =
         projectRoleRepository.selectAll().map { list ->
             list.map { it.toProjectRoleResponse() }.toProjectRoleResponseList()
         }
+
+    override suspend fun update(id: Int, projectRole: ProjectRoleRequest) =
+        projectRoleRepository.update(id, projectRole)
+            .flatMap { selectById(id) }
 }

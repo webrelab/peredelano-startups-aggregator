@@ -18,7 +18,6 @@ object Ideas : UUIDTable(name = "ideas") {
     val owner = reference("owner", Users.id)
     val title = varchar("title", 100).nullable()
     val tgLink = varchar("tg_link", 100).nullable()
-    val boostyLink = varchar("boostyLink", 100).nullable()
     val isFavorite = bool("is_favorite").default(false)
     val problem = text("problem")
     val description = text("description").nullable()

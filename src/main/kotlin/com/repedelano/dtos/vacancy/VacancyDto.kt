@@ -1,5 +1,6 @@
 package com.repedelano.dtos.vacancy
 
+import com.repedelano.dtos.UUIDSerializer
 import com.repedelano.dtos.projectroles.ProjectRoleResponse
 import com.repedelano.dtos.technology.TechnologyResponse
 import kotlinx.serialization.Contextual
@@ -8,7 +9,7 @@ import java.util.UUID
 
 @Serializable
 data class VacancyRequest(
-    @Contextual
+    @Serializable(with = UUIDSerializer::class)
     val ideaId: UUID,
     val projectRole: String,
     val techStack: List<String>,

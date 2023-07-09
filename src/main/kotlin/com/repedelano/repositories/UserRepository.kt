@@ -7,7 +7,9 @@ import com.repedelano.resultOf
 import com.repedelano.utils.db.DbTransaction
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.insertIgnoreAndGetId
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
@@ -19,6 +21,7 @@ interface UserRepository {
     suspend fun selectById(id: Int): Result<ResultRow?>
     suspend fun selectByPassportId(passportId: String): Result<ResultRow?>
     suspend fun selectByEmail(email: String): Result<ResultRow?>
+    suspend fun search(user: UserRequest): Result<List<ResultRow>>
     suspend fun selectAll(): Result<List<ResultRow>>
     suspend fun update(id: Int, user: UserRequest): Result<Boolean>
 }
@@ -29,7 +32,7 @@ class UserRepositoryImpl(private val dbTransaction: DbTransaction) : UserReposit
         return dbTransaction.dbQuery {
             resultOf {
                 val timestamp = Instant.now()
-                Users.insertIgnoreAndGetId {
+                Users.insertAndGetId {
                     it[passportId] = user.passportId
                     it[email] = user.email
                     it[name] = user.name
@@ -37,7 +40,7 @@ class UserRepositoryImpl(private val dbTransaction: DbTransaction) : UserReposit
                     it[tgUser] = user.tgUser
                     it[picture] = user.picture
                     it[registered] = timestamp
-                }?.value
+                }.value
             }
         }
     }
@@ -53,7 +56,7 @@ class UserRepositoryImpl(private val dbTransaction: DbTransaction) : UserReposit
     override suspend fun selectByPassportId(passportId: String): Result<ResultRow?> {
         return dbTransaction.dbQuery {
             resultOf {
-                Users.select(Users.passportId eq passportId) .firstOrNull()
+                Users.select(Users.passportId eq passportId).firstOrNull()
             }
         }
     }
@@ -62,6 +65,20 @@ class UserRepositoryImpl(private val dbTransaction: DbTransaction) : UserReposit
         return dbTransaction.dbQuery {
             resultOf {
                 Users.select(Users.email eq email).firstOrNull()
+            }
+        }
+    }
+
+    override suspend fun search(user: UserRequest): Result<List<ResultRow>> {
+        return dbTransaction.dbQuery {
+            resultOf {
+                Users.select(
+                    Users.passportId like "%${user.passportId}%" and
+                        (Users.email like "%${user.email}%") and
+                        (Users.tgUser like "%${user.tgUser}%") and
+                        (Users.name like "%${user.name}%") and
+                        (Users.lastName like "%${user.lastName}%")
+                ).toList()
             }
         }
     }

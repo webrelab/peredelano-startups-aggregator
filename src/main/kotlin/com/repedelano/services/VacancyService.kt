@@ -18,12 +18,12 @@ import java.util.UUID
 
 interface VacancyService {
 
-    suspend fun insert(vacancy: VacancyRequest): Result<VacancyResponse>
-    suspend fun selectById(id: Int): Result<VacancyResponse>
+    suspend fun insert(vacancy: VacancyRequest): Result<VacancyResponse?>
+    suspend fun selectById(id: Int): Result<VacancyResponse?>
     suspend fun selectByIdeaId(id: UUID): Result<VacancyResponseList>
     suspend fun selectByTechStack(technologies: List<String>): Result<VacancyResponseList>
     suspend fun selectPage(pager: Pager): Result<VacancyResponseList>
-    suspend fun update(id: Int, vacancy: VacancyRequest): Result<VacancyResponse>
+    suspend fun update(id: Int, vacancy: VacancyRequest): Result<VacancyResponse?>
 }
 
 class VacancyServiceImpl(

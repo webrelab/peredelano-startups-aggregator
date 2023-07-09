@@ -11,7 +11,7 @@ import com.repedelano.utils.db.DbTransaction
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
-import org.jetbrains.exposed.sql.insertIgnoreAndGetId
+import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
@@ -34,12 +34,12 @@ class VacancyRepositoryImpl(private val dbTransaction: DbTransaction) : VacancyR
             resultOf {
                 val projectRoleId = ProjectRoles.select(ProjectRoles.name eq vacancy.projectRole)
                     .first()[ProjectRoles.id]
-                Vacancies.insertIgnoreAndGetId {
+                Vacancies.insertAndGetId {
                     it[ideaId] = vacancy.ideaId
                     it[projectRole] = projectRoleId
                     it[description] = vacancy.description
                     it[status] = VacancyStatus.OPEN
-                }?.value
+                }.value
             }
         }
     }

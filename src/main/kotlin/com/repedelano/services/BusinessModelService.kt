@@ -10,11 +10,10 @@ import com.repedelano.repositories.BusinessModelRepository
 
 interface BusinessModelService {
 
-    suspend fun insert(businessModel: BusinessModelRequest): Result<BusinessModelResponse>
-    suspend fun selectById(id: Int): Result<BusinessModelResponse>
-    suspend fun selectByName(name: String): Result<BusinessModelResponse>
+    suspend fun insert(businessModel: BusinessModelRequest): Result<BusinessModelResponse?>
+    suspend fun selectById(id: Int): Result<BusinessModelResponse?>
     suspend fun selectAll(): Result<BusinessModelResponseList>
-    suspend fun update(id: Int, businessModel: BusinessModelRequest): Result<BusinessModelResponse>
+    suspend fun update(id: Int, businessModel: BusinessModelRequest): Result<BusinessModelResponse?>
 }
 
 class BusinessModelServiceImpl(
@@ -26,9 +25,6 @@ class BusinessModelServiceImpl(
 
     override suspend fun selectById(id: Int) =
         businessModelRepository.selectById(id).map { it!!.toBusinessModel() }
-
-    override suspend fun selectByName(name: String) =
-        businessModelRepository.selectByName(name).map { it!!.toBusinessModel() }
 
     override suspend fun selectAll() =
         businessModelRepository.selectAll().map { list ->

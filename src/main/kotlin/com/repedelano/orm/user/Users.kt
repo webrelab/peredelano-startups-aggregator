@@ -5,8 +5,8 @@ import org.jetbrains.exposed.sql.javatime.timestamp
 
 object Users : IntIdTable(name = "users") {
 
-    val passportId = varchar("passport_id", 100)
-    val email = varchar("email", 100)
+    val passportId = varchar("passport_id", 100).uniqueIndex()
+    val email = varchar("email", 100).uniqueIndex()
     val name = varchar("name", 100)
     val lastName = varchar("lastName", 100)
     val tgUser = varchar("tg_user", 100)
