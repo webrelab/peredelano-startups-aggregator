@@ -6,12 +6,12 @@ import com.repedelano.orm.idea.Ideas
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toIdea(): IdeaResponse {
-    return Ideas.run {
+    return with(Ideas) {
         IdeaResponse(
             id = get(id).value,
             created = get(created).toString(),
             updated = get(updated).toString(),
-            owner = get(owner).value,
+            owner = get(owner)?.value,
             title = get(title),
             tgLink = get(tgLink),
             scopes = mutableListOf(),

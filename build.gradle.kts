@@ -36,6 +36,7 @@ dependencies {
     implementation("io.ktor:ktor-server-content-negotiation-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-host-common-jvm:$ktor_version")
     implementation("io.ktor:ktor-server-status-pages-jvm:$ktor_version")
+    implementation("io.ktor:ktor-server-double-receive:$ktor_version")
     implementation("io.ktor:ktor-client-content-negotiation-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-apache-jvm:$ktor_version")
@@ -49,10 +50,11 @@ dependencies {
     implementation("io.insert-koin:koin-ktor:$koin_version")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.github.microutils:kotlin-logging-jvm:$kotlin_logging")
+    implementation("io.github.serpro69:kotlin-faker:$faker_version")
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junit_version")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:$junit_version")
-    testImplementation("io.github.serpro69:kotlin-faker:$faker_version")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junit_version")
 
 }
 

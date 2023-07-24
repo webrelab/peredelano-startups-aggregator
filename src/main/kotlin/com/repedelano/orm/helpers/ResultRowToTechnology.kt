@@ -6,7 +6,7 @@ import com.repedelano.orm.technology.Technologies
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toTechnology(): TechnologyResponse {
-    return Technologies.run {
+    return with(Technologies) {
         TechnologyResponse(
             id = get(id).value,
             value = get(value)

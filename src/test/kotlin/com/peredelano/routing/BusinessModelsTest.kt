@@ -1,12 +1,12 @@
 package com.peredelano.routing
 
 import com.peredelano.BaseTest
-import com.peredelano.datageneration.createBusinessModels
-import com.peredelano.datageneration.getFakeBusinessModel
 import com.peredelano.ext.assertAll
 import com.peredelano.ext.getConverted
 import com.peredelano.ext.postConverted
-import com.peredelano.ext.putOk
+import com.peredelano.ext.postCreated
+import com.peredelano.ext.putConverted
+import com.repedelano.datagenerator.RequestGenerators.getFakeBusinessModel
 import com.repedelano.dtos.businessmodel.BusinessModelRequest
 import com.repedelano.dtos.businessmodel.BusinessModelResponse
 import com.repedelano.dtos.businessmodel.BusinessModelResponseList
@@ -23,22 +23,22 @@ class BusinessModelsTest : BaseTest() {
 
         @JvmStatic
         @BeforeAll
-        fun businessModelsSetUp() = createBusinessModels(10, testEngine)
+        fun businessModelsSetUp() = repeat(10) {testEngine.postCreated(ADD_BM, getFakeBusinessModel())}
     }
 
     @Test
     fun addBusinessModel() = with(testEngine) {
-        val bm = getFakeBusinessModel()
-        val response: BusinessModelResponse = postConverted(ADD_BM, bm)
-        response.assertAll(bm)
+        val data = getFakeBusinessModel()
+        val response: BusinessModelResponse = postConverted(ADD_BM, data)
+        response.assertAll(data)
     }
 
     @Test
     fun getById() = with(testEngine) {
-        val bm = getFakeBusinessModel()
-        val createdId = postConverted<BusinessModelRequest, BusinessModelResponse>(ADD_BM, bm).id
+        val data = getFakeBusinessModel()
+        val createdId = postConverted<BusinessModelRequest, BusinessModelResponse>(ADD_BM, data).id
         val response: BusinessModelResponse = getConverted(clientBmWithId(createdId))
-        response.assertAll(bm)
+        response.assertAll(data)
     }
 
     @Test
@@ -49,9 +49,10 @@ class BusinessModelsTest : BaseTest() {
 
     @Test
     fun update() = with(testEngine) {
-        val bm = getFakeBusinessModel()
-        putOk(clientBmWithId(6), bm)
+        val data = getFakeBusinessModel()
+        val putResult: BusinessModelResponse = putConverted(clientBmWithId(6), data)
+        putResult.assertAll(data)
         val response: BusinessModelResponse = getConverted(clientBmWithId(6))
-        response.assertAll(bm)
+        response.assertAll(data)
     }
 }

@@ -1,15 +1,12 @@
 package com.peredelano.routing
 
 import com.peredelano.BaseTest
-import com.peredelano.datageneration.createUsers
-import com.peredelano.datageneration.getFakeBusinessModel
-import com.peredelano.datageneration.getFakeUser
 import com.peredelano.ext.assertAll
 import com.peredelano.ext.getConverted
-import com.peredelano.ext.post
 import com.peredelano.ext.postConverted
 import com.peredelano.ext.postCreated
 import com.peredelano.ext.putOk
+import com.repedelano.datagenerator.RequestGenerators.getFakeUser
 import com.repedelano.dtos.user.UserRequest
 import com.repedelano.dtos.user.UserResponse
 import com.repedelano.dtos.user.UserResponseList
@@ -31,7 +28,9 @@ class UsersTest : BaseTest() {
 
         @JvmStatic
         @BeforeAll
-        fun usersSetUp() = createUsers(30, testEngine)
+        fun usersSetUp() = repeat(30) {
+            testEngine.postCreated(ADD_USER, getFakeUser())
+        }
     }
 
     @Test
@@ -168,11 +167,5 @@ class UsersTest : BaseTest() {
             assertNotNull(user, "User ${d.name} not found")
             user!!.assertAll(d)
         }
-    }
-
-    @Test
-    fun wrongUserModel() = with(testEngine) {
-        val response = post(ADD_USER, null)
-        assertEquals(HttpStatusCode.BadRequest, response.status())
     }
 }

@@ -15,6 +15,7 @@ interface BusinessModelRepository {
 
     suspend fun insert(businessModel: BusinessModelRequest): Result<Int?>
     suspend fun selectById(id: Int): Result<ResultRow?>
+    suspend fun selectByName(name: String): Result<ResultRow?>
     suspend fun selectAll(): Result<List<ResultRow>>
     suspend fun update(id: Int, businessModel: BusinessModelRequest): Result<Boolean>
 }
@@ -36,6 +37,14 @@ class BusinessModelRepositoryImpl(private val dbTransaction: DbTransaction) : Bu
         return dbTransaction.dbQuery {
             resultOf {
                 BusinessModels.select(BusinessModels.id eq id).firstOrNull()
+            }
+        }
+    }
+
+    override suspend fun selectByName(name: String): Result<ResultRow?> {
+        return dbTransaction.dbQuery {
+            resultOf {
+                BusinessModels.select(BusinessModels.value eq name).firstOrNull()
             }
         }
     }

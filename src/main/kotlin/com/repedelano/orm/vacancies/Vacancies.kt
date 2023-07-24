@@ -10,7 +10,7 @@ import org.jetbrains.exposed.sql.Table
 object Vacancies : IntIdTable("vacancies") {
 
     val ideaId = reference("idea_id", Ideas.id)
-    val projectRole = reference("project_role_id", ProjectRoles)
+    val projectRoleId = reference("project_role_id", ProjectRoles)
     val description = text("description")
     val status = enumerationByName("status", 50, VacancyStatus::class)
 }

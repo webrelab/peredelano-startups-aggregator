@@ -12,7 +12,7 @@ interface TechnologyService {
 
     suspend fun insertIfNotExists(technology: TechnologyRequest): Result<TechnologyResponse?>
     suspend fun selectById(id: Int): Result<TechnologyResponse?>
-    suspend fun selectByName(name: String): Result<TechnologyResponse?>
+    suspend fun search(query: String): Result<TechnologyResponseList>
     suspend fun selectAll(): Result<TechnologyResponseList>
     suspend fun update(id: Int, technology: TechnologyRequest): Result<TechnologyResponse?>
 }
@@ -27,8 +27,10 @@ class TechnologyServiceImpl(
     override suspend fun selectById(id: Int) =
         technologyRepository.selectById(id).map { it!!.toTechnology() }
 
-    override suspend fun selectByName(name: String) =
-        technologyRepository.selectByName(name).map { it!!.toTechnology() }
+    override suspend fun search(query: String) =
+        technologyRepository.search(query).map { list->
+            list.map { it.toTechnology() }.toTechnologyResponseList()
+        }
 
     override suspend fun selectAll() =
         technologyRepository.selectAll().map { list ->

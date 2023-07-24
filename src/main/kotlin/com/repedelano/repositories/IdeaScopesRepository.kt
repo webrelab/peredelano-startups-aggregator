@@ -7,47 +7,34 @@ import com.repedelano.utils.db.DbTransaction
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import java.util.UUID
 
 interface IdeaScopesRepository {
 
-    suspend fun insert(ideaId: UUID, scopeId: Int): Result<Boolean>
-    suspend fun insert(ideaId: UUID, scopeName: String): Result<Boolean>
-    suspend fun selectBuIdeaId(ideaId: UUID): Result<List<ResultRow>>
+    suspend fun insert(ideaId: UUID, scopeIds: Collection<Int>): Result<Boolean>
+    suspend fun selectByIdeaId(ideaId: UUID): Result<List<ResultRow>>
     suspend fun delete(ideaId: UUID): Result<Boolean>
+    suspend fun delete(ideaId: UUID, scopeIds: Collection<Int>): Result<Boolean>
 }
 
 class IdeaScopesRepositoryImpl(private val dbTransaction: DbTransaction) : IdeaScopesRepository {
 
-    override suspend fun insert(ideaId: UUID, scopeId: Int): Result<Boolean> {
+    override suspend fun insert(ideaId: UUID, scopeIds: Collection<Int>): Result<Boolean> {
         return dbTransaction.dbQuery {
             resultOf {
-                IdeaScopes.insert {
-                    it[IdeaScopes.ideaId] = ideaId
-                    it[IdeaScopes.scopeId] = scopeId
-                }.resultedValues != null
+                IdeaScopes.batchInsert(scopeIds) { scopeId ->
+                    this[IdeaScopes.ideaId] = ideaId
+                    this[IdeaScopes.scopeId] = scopeId
+                }.isNotEmpty()
             }
         }
     }
 
-    override suspend fun insert(ideaId: UUID, scopeName: String): Result<Boolean> {
-        return dbTransaction.dbQuery {
-            resultOf {
-                IdeaScopes.insert {
-                    it[IdeaScopes.ideaId] = ideaId
-                    it[scopeId] = Scopes.slice(Scopes.id)
-                        .select(Scopes.value eq scopeName)
-                        .map { row -> row[Scopes.id] }.firstOrNull()
-                        ?: throw java.lang.IllegalArgumentException("$scopeName not found")
-                }.resultedValues != null
-            }
-        }
-    }
-
-    override suspend fun selectBuIdeaId(ideaId: UUID): Result<List<ResultRow>> {
+    override suspend fun selectByIdeaId(ideaId: UUID): Result<List<ResultRow>> {
         return dbTransaction.dbQuery {
             resultOf {
                 IdeaScopes.join(Scopes, JoinType.INNER, onColumn = IdeaScopes.scopeId, otherColumn = Scopes.id)
@@ -62,6 +49,19 @@ class IdeaScopesRepositoryImpl(private val dbTransaction: DbTransaction) : IdeaS
         return dbTransaction.dbQuery {
             resultOf {
                 IdeaScopes.deleteWhere { IdeaScopes.ideaId eq ideaId } > 0
+            }
+        }
+    }
+
+    override suspend fun delete(ideaId: UUID, scopeIds: Collection<Int>): Result<Boolean> {
+        return dbTransaction.dbQuery {
+            resultOf {
+                scopeIds.map { scopeId ->
+                    IdeaScopes.deleteWhere {
+                        IdeaScopes.ideaId eq ideaId and
+                            (IdeaScopes.scopeId eq scopeId)
+                    }
+                }.isNotEmpty()
             }
         }
     }

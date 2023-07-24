@@ -15,11 +15,11 @@ object Ideas : UUIDTable(name = "ideas") {
 
     val created = timestamp("created")
     val updated = timestamp("updated")
-    val owner = reference("owner", Users.id)
+    val owner = reference("owner", Users.id).nullable()
     val title = varchar("title", 100).nullable()
     val tgLink = varchar("tg_link", 100).nullable()
     val isFavorite = bool("is_favorite").default(false)
-    val problem = text("problem")
+    val problem = text("problem").nullable()
     val description = text("description").nullable()
     val similarProjects = text("similar_projects").nullable()
     val targetAudience = text("target_audience").nullable()

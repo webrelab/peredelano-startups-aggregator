@@ -1,5 +1,6 @@
 package com.repedelano
 
+import com.repedelano.datagenerator.RequestGenerators
 import com.repedelano.plugins.configure
 import com.repedelano.plugins.configureRouting
 import com.repedelano.plugins.configureSecurity
@@ -50,4 +51,14 @@ fun Application.module() {
     logger.info { "Routing configured" }
 
     dbFactory.connect()
+
+    if (environment.config.property("ktor.environment").getString() == "dev") {
+        with(RequestGenerators) {
+            generateScopes(25)
+            generateBusinessModels(4)
+            generateTechnologies(48)
+            generateUsers(180)
+            generateIdeas(120)
+        }
+    }
 }

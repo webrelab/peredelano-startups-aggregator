@@ -6,7 +6,7 @@ import com.repedelano.orm.projrctroles.ProjectRoles
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toProjectRoleResponse(): ProjectRoleResponse {
-    return ProjectRoles.run {
+    return with(ProjectRoles) {
         ProjectRoleResponse(
             id = get(id).value,
             name = get(name),

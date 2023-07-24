@@ -6,7 +6,9 @@ import com.repedelano.resultOf
 import com.repedelano.utils.db.DbTransaction
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.update
@@ -15,7 +17,7 @@ interface TechnologyRepository {
 
     suspend fun insertIfNotExists(technology: TechnologyRequest): Result<Int?>
     suspend fun selectById(id: Int): Result<ResultRow?>
-    suspend fun selectByName(name: String): Result<ResultRow?>
+    suspend fun search(query: String): Result<List<ResultRow>>
     suspend fun selectAll(): Result<List<ResultRow>>
     suspend fun update(id: Int, technology: TechnologyRequest): Result<Boolean>
 }
@@ -43,10 +45,10 @@ class TechnologyRepositoryImpl(private val dbTransaction: DbTransaction) : Techn
         }
     }
 
-    override suspend fun selectByName(name: String): Result<ResultRow?> {
+    override suspend fun search(query: String): Result<List<ResultRow>> {
         return dbTransaction.dbQuery {
             resultOf {
-                Technologies.select(Technologies.value eq name).firstOrNull()
+                Technologies.select(Technologies.value.lowerCase() like "%${query.lowercase()}%").toList()
             }
         }
     }

@@ -6,7 +6,7 @@ import com.repedelano.orm.user.Users
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toUser(): UserResponse {
-    return Users.run {
+    return with(Users) {
         UserResponse(
             id = get(id).value,
             passportId = get(passportId),

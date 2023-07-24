@@ -13,6 +13,15 @@ data class UserRequest(
 )
 
 @Serializable
+data class UserSearchRequest(
+    val passportId: String? = null,
+    val name: String? = null,
+    val lastName: String? = null,
+    val email: String? = null,
+    val tgUser: String? = null,
+)
+
+@Serializable
 data class UserResponse(
     val id: Int,
     val passportId: String,

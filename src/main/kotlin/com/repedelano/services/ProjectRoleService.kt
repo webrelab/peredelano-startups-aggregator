@@ -20,7 +20,7 @@ interface ProjectRoleService {
 class ProjectRoleServiceImpl(private val projectRoleRepository: ProjectRoleRepository) : ProjectRoleService {
 
     override suspend fun add(projectRole: ProjectRoleRequest) =
-        projectRoleRepository.insert(projectRole).flatMap { selectById(it!!) }
+        projectRoleRepository.insertIfNotExists(projectRole).flatMap { selectById(it!!) }
 
     override suspend fun selectById(id: Int) =
         projectRoleRepository.selectById(id).map { it!!.toProjectRoleResponse() }

@@ -4,6 +4,7 @@ import com.repedelano.dtos.Pager
 import com.repedelano.dtos.user.UserRequest
 import com.repedelano.dtos.user.UserResponse
 import com.repedelano.dtos.user.UserResponseList
+import com.repedelano.dtos.user.UserSearchRequest
 import com.repedelano.services.UserService
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -20,12 +21,7 @@ fun interface GetUserByIdUseCase {
 
 fun interface SearchUserUseCase {
 
-    suspend fun search(pager: Pager, user: UserRequest): Result<UserResponseList>
-}
-
-fun interface GetUsersUseCase {
-
-    suspend fun getPage(pager: Pager): Result<UserResponseList>
+    suspend fun search(pager: Pager, user: UserSearchRequest): Result<UserResponseList>
 }
 
 fun interface UpdateUserUseCase {
@@ -57,16 +53,6 @@ fun searchUserUseCase(
 ) = SearchUserUseCase{pager, user ->
     withContext(dispatcher) {
         userService.search(pager, user)
-    }
-}
-
-
-fun getUsersUseCase(
-    dispatcher: CoroutineDispatcher,
-    userService: UserService
-) = GetUsersUseCase { pager ->
-    withContext(dispatcher) {
-        userService.selectPage(pager)
     }
 }
 

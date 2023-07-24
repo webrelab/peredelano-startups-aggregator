@@ -16,7 +16,11 @@ fun TestApplicationEngine.get(url: String) =
 
 fun TestApplicationEngine.getOk(url: String) =
     get(url)
-        .also { Assertions.assertEquals(HttpStatusCode.OK, it.status()) }.content
+        .also { Assertions.assertEquals(
+            HttpStatusCode.OK,
+            it.status(),
+            "${it.content}"
+        ) }.content
 
 inline fun <reified T> TestApplicationEngine.getConvertedNullable(url: String) =
     getOk(url)?.let { Json.decodeFromString<T>(it) }
@@ -32,7 +36,11 @@ inline fun <reified T : Any> TestApplicationEngine.post(url: String, obj: T?) =
 
 inline fun <reified T : Any> TestApplicationEngine.postCreated(url: String, obj: T) =
     post(url, obj)
-        .also { Assertions.assertEquals(HttpStatusCode.Created, it.status()) }
+        .also { Assertions.assertEquals(
+            HttpStatusCode.Created,
+            it.status(),
+            "${it.content}"
+        ) }
         .content
 
 inline fun <reified T : Any, reified R : Any> TestApplicationEngine.postConvertedNullable(url: String, obj: T) =
@@ -41,20 +49,24 @@ inline fun <reified T : Any, reified R : Any> TestApplicationEngine.postConverte
 inline fun <reified T : Any, reified R : Any> TestApplicationEngine.postConverted(url: String, obj: T) =
     postConvertedNullable<T, R>(url, obj)!!
 
-inline fun <reified T : Any> TestApplicationEngine.put(url: String, obj: T) =
+inline fun <reified T : Any> TestApplicationEngine.put(url: String, obj: T?) =
     handleRequest(HttpMethod.Put, url) {
         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-        setBody(Json.encodeToString(obj))
+        obj?.let{ setBody(Json.encodeToString(obj)) }
     }.response
 
-inline fun <reified T : Any> TestApplicationEngine.putOk(url: String, obj: T) =
+inline fun <reified T : Any> TestApplicationEngine.putOk(url: String, obj: T?) =
     put(url, obj)
-        .also { Assertions.assertEquals(HttpStatusCode.OK, it.status()) }
+        .also { Assertions.assertEquals(
+            HttpStatusCode.OK,
+            it.status(),
+            "${it.content}"
+        ) }
         .content
 
-inline fun <reified T : Any, reified R : Any> TestApplicationEngine.putConvertedNullable(url: String, obj: T) =
+inline fun <reified T : Any, reified R : Any> TestApplicationEngine.putConvertedNullable(url: String, obj: T?) =
     putOk(url, obj)?.let { Json.decodeFromString<R>(it) }
 
-inline fun <reified T : Any, reified R : Any> TestApplicationEngine.putConverted(url: String, obj: T) =
+inline fun <reified T : Any, reified R : Any> TestApplicationEngine.putConverted(url: String, obj: T?) =
     putConvertedNullable<T, R>(url, obj)!!
 

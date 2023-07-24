@@ -10,10 +10,10 @@ import com.repedelano.dtos.idea.IdeaStatus
 object IdeaStatusHandler {
 
     fun getStatus(ideaRequest: IdeaRequest, vacanciesTotal: Int = 0, stage: IdeaStage = IdeaStage.OPEN): IdeaStatus {
-        return ideaRequest.run {
+        return with(ideaRequest) {
             when {
                 stage == IdeaStage.DONE || stage == IdeaStage.DECLINED -> IdeaStatus.PROJECT_CLOSED
-                isBlank(description) -> IdeaStatus.SEARCH_SOLUTION
+                isBlank(description, title, tgLink) -> IdeaStatus.SEARCH_SOLUTION
                 isBlank(scopes) || isBlank(similarProjects, targetAudience, marketResearch) -> IdeaStatus.COLLECT_SOCIO_ECONOMIC_INFO
                 isBlank(businessModels) || isBlank(businessPlan) -> IdeaStatus.FINANCIAL_JUSTIFICATION_REQUIRED
                 isBlank(techStack) || isBlank(resources) -> IdeaStatus.SEARCH_TECHNOLOGICAL_SOLUTION
@@ -24,10 +24,10 @@ object IdeaStatusHandler {
     }
 
     fun getStatus(ideaResponse: IdeaResponse, vacanciesTotal: Int): IdeaStatus {
-        return ideaResponse.run {
+        return with(ideaResponse) {
             when {
                 stage == IdeaStage.DONE || stage == IdeaStage.DECLINED -> IdeaStatus.PROJECT_CLOSED
-                isBlank(description) -> IdeaStatus.SEARCH_SOLUTION
+                isBlank(description, title, tgLink) -> IdeaStatus.SEARCH_SOLUTION
                 isBlank(scopes) || isBlank(similarProjects, targetAudience, marketResearch) -> IdeaStatus.COLLECT_SOCIO_ECONOMIC_INFO
                 isBlank(businessModels) || isBlank(businessPlan) -> IdeaStatus.FINANCIAL_JUSTIFICATION_REQUIRED
                 isBlank(techStack) || isBlank(resources) -> IdeaStatus.SEARCH_TECHNOLOGICAL_SOLUTION

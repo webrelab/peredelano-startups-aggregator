@@ -9,6 +9,7 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
@@ -48,9 +49,10 @@ class ScopeRepositoryImpl(private val dbTransaction: DbTransaction) : ScopeRepos
     override suspend fun search(query: String): Result<List<ResultRow>> {
         return dbTransaction.dbQuery {
             resultOf {
+                val lowerCaseQuery = query.lowercase()
                 Scopes.select(
-                    Scopes.value like query or
-                        (Scopes.description like query)
+                    Scopes.value.lowerCase() like "%$lowerCaseQuery%" or
+                        (Scopes.description.lowerCase() like "%$lowerCaseQuery%")
                 ).toList()
             }
         }

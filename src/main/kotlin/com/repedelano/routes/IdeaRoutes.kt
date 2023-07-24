@@ -4,18 +4,28 @@ import com.repedelano.deconstructResult
 import com.repedelano.dtos.Pager
 import com.repedelano.dtos.SerializedException
 import com.repedelano.dtos.idea.IdeaRequest
-import com.repedelano.extensions.toIdeaStage
+import com.repedelano.dtos.idea.IdeaSearchRequest
+import com.repedelano.dtos.idea.IdeaStageRequest
+import com.repedelano.extensions.isEmpty
 import com.repedelano.extensions.toUuidOrNull
 import com.repedelano.routes.IdeaRoutes.Companion.ADD_IDEA
+import com.repedelano.routes.IdeaRoutes.Companion.BM
 import com.repedelano.routes.IdeaRoutes.Companion.IDEAS
-import com.repedelano.routes.IdeaRoutes.Companion.STAGE
+import com.repedelano.routes.IdeaRoutes.Companion.OWNER
+import com.repedelano.routes.IdeaRoutes.Companion.QUERY_STRING
+import com.repedelano.routes.IdeaRoutes.Companion.SCOPES
+import com.repedelano.routes.IdeaRoutes.Companion.TS
 import com.repedelano.routes.IdeaRoutes.Companion.serverIdeaWithId
 import com.repedelano.routes.IdeaRoutes.Companion.serverRequestStage
+import com.repedelano.routes.PagerRoutes.Companion.ITEMS_PER_PAGE
+import com.repedelano.routes.PagerRoutes.Companion.PAGE
+import com.repedelano.routes.PagerRoutes.Companion.clientAddPager
 import com.repedelano.routes.RouteConstants.Companion.API_V1
 import com.repedelano.routes.RouteConstants.Companion.ID
 import com.repedelano.usecases.AddIdeaUseCase
 import com.repedelano.usecases.GetIdeaUseCase
 import com.repedelano.usecases.GetIdeasUseCase
+import com.repedelano.usecases.SearchIdeaUseCase
 import com.repedelano.usecases.UpdateIdeaStageUseCase
 import com.repedelano.usecases.UpdateIdeaUseCase
 import io.ktor.http.HttpStatusCode
@@ -36,22 +46,41 @@ class IdeaRoutes {
         const val ADD_IDEA = "$IDEA/add"
         const val IDEAS = "$API_V1/ideas"
         const val STAGE: String = "stage"
+        const val OWNER = "owner"
+        const val QUERY_STRING = "queryString"
+        const val SCOPES = "scopes"
+        const val BM = "businessModels"
+        const val TS = "techStack"
 
         fun serverIdeaWithId() = "$IDEA/{$ID}"
 
-        fun clientIdeaWithId(id: String?) = id?.let { "$IDEA/$it" } ?: IDEA
+        fun serverRequestStage() = "$IDEA/$STAGE/{$ID}"
 
-        fun clientGetPage(page: String?, itemsPerPage: String?) = PagerRoutes.clientAddPager(IDEAS, page, itemsPerPage)
+        fun clientIdeaWithId(id: Any?) = id?.let { "$IDEA/$id" } ?: IDEA
 
-        fun serverRequestStage() = "$IDEA/{$ID}/{$STAGE}"
+        fun clientUpdateStage(id: Any?) = id?.let { "$IDEA/$STAGE/$it" } ?: "$IDEA/$STAGE"
 
-        fun clientRequestStage(id: Any?, stage: Any?) = listOfNotNull(
-            id?.let { "$ID=$it" },
-            stage?.let { "$STAGE=$it" }
-        ).joinToString("&").let {
-            if (it.isBlank()) IDEA
-            else "$IDEA?$it"
-        }
+        fun clientGetPage(page: Any?, itemsPerPage: Any?) = PagerRoutes.clientAddPager(IDEAS, page, itemsPerPage)
+        fun clientIdeaSearch(
+            owner: Any? = null,
+            queryString: Any? = null,
+            scopes: List<Any>? = null,
+            businessModels: List<Any>? = null,
+            techStack: List<Any>? = null,
+            page: Any? = null,
+            itemsPerPage: Any? = null,
+        ) = listOfNotNull(
+            owner?.let {"$OWNER=$owner"},
+            queryString?.let{"$QUERY_STRING=$queryString"},
+            scopes?.let{"$SCOPES=${it.joinToString(",")}"},
+            businessModels?.let{"$BM=${it.joinToString(",")}"},
+            techStack?.let{"$TS=${it.joinToString(",")}"}
+        ).joinToString("&")
+            .let {
+                if (it.isBlank()) IDEAS
+                else "$IDEAS?$it"
+            }.let { clientAddPager(it, page, itemsPerPage) }
+
     }
 }
 
@@ -106,12 +135,36 @@ private fun Routing.getIdea() {
 
 private fun Routing.getIdeas() {
     val getIdeasUseCase by inject<GetIdeasUseCase>()
+    val searchIdeaUseCase by inject<SearchIdeaUseCase>()
     get(IDEAS) {
         try {
-            val page = call.parameters[PagerRoutes.PAGE]?.toIntOrNull() ?: 0
-            val itemsPerPage = call.parameters[PagerRoutes.ITEMS_PER_PAGE]?.toIntOrNull() ?: 20
-            val pager = Pager(page, itemsPerPage)
-            val result = getIdeasUseCase.getPage(pager)
+            val scopes = call.parameters[SCOPES]
+                ?.split(",")
+                ?.mapNotNull { it.trim().toIntOrNull() }
+                ?: listOf()
+            val businessModels = call.parameters[BM]
+                ?.split(",")
+                ?.mapNotNull { it.trim().toIntOrNull() }
+                ?: listOf()
+            val techStack = call.parameters[TS]
+                ?.split(",")
+                ?.mapNotNull { it.trim().toIntOrNull() }
+                ?: listOf()
+            val searchQuery = IdeaSearchRequest(
+                owner = call.parameters[OWNER]?.toIntOrNull(),
+                queryString = call.parameters[QUERY_STRING],
+                scopes = scopes,
+                businessModels = businessModels,
+                techStack = techStack
+            )
+            val pager = Pager.of(
+                call.parameters[PAGE]?.toIntOrNull(),
+                call.parameters[ITEMS_PER_PAGE]?.toIntOrNull()
+            )
+            val result = when {
+                searchQuery.isEmpty() -> getIdeasUseCase.getPage(pager)
+                else -> searchIdeaUseCase.search(pager, searchQuery)
+            }
             deconstructResult(this, result, HttpStatusCode.OK)
         } catch (e: Throwable) {
             call.respond(
@@ -157,14 +210,14 @@ private fun Routing.updateIdeaStage() {
         try {
             call.parameters[ID]?.toUuidOrNull()
                 ?.let { id ->
-                    call.parameters[STAGE]?.toIdeaStage()
+                    call.receiveNullable<IdeaStageRequest>()
                         ?.let { stage ->
-                            val result = updateIdeaStageUseCase.update(id, stage)
+                            val result = updateIdeaStageUseCase.update(id, stage.stage)
                             deconstructResult(this, result, HttpStatusCode.OK)
                         }
                         ?: call.respond(
                             HttpStatusCode.BadRequest,
-                            "Invalid or missing IdeaStage"
+                            "Invalid or missing IdeaStageRequest"
                         )
                 }
                 ?: call.respond(

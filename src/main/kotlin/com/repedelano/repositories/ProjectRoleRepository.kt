@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
@@ -15,7 +16,7 @@ import org.jetbrains.exposed.sql.update
 
 interface ProjectRoleRepository {
 
-    suspend fun insert(projectRole: ProjectRoleRequest): Result<Int?>
+    suspend fun insertIfNotExists(projectRole: ProjectRoleRequest): Result<Int?>
     suspend fun selectById(id: Int): Result<ResultRow?>
     suspend fun search(query: String): Result<List<ResultRow>>
     suspend fun selectAll(): Result<List<ResultRow>>
@@ -24,13 +25,15 @@ interface ProjectRoleRepository {
 
 class ProjectRoleRepositoryImpl(private val dbTransaction: DbTransaction) : ProjectRoleRepository {
 
-    override suspend fun insert(projectRole: ProjectRoleRequest): Result<Int?> {
+    override suspend fun insertIfNotExists(projectRole: ProjectRoleRequest): Result<Int?> {
         return dbTransaction.dbQuery {
             resultOf {
-                ProjectRoles.insertAndGetId {
-                    it[name] = projectRole.name
-                    it[description] = projectRole.description
-                }.value
+                ProjectRoles.select(ProjectRoles.name eq projectRole.name)
+                    .map { it[ProjectRoles.id].value }.firstOrNull()
+                    ?: ProjectRoles.insertAndGetId {
+                        it[name] = projectRole.name
+                        it[description] = projectRole.description
+                    }.value
             }
         }
     }
@@ -46,9 +49,10 @@ class ProjectRoleRepositoryImpl(private val dbTransaction: DbTransaction) : Proj
     override suspend fun search(query: String): Result<List<ResultRow>> {
         return dbTransaction.dbQuery {
             resultOf {
+                val lowerCaseQuery = query.lowercase()
                 ProjectRoles.select(
-                    ProjectRoles.name like query or
-                        (ProjectRoles.description like query)
+                    ProjectRoles.name.lowerCase() like "%$lowerCaseQuery%" or
+                        (ProjectRoles.description.lowerCase() like "%$lowerCaseQuery%")
                 ).toList()
             }
         }

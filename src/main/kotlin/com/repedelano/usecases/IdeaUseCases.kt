@@ -4,6 +4,7 @@ import com.repedelano.dtos.Pager
 import com.repedelano.dtos.idea.IdeaRequest
 import com.repedelano.dtos.idea.IdeaResponse
 import com.repedelano.dtos.idea.IdeaResponseList
+import com.repedelano.dtos.idea.IdeaSearchRequest
 import com.repedelano.dtos.idea.IdeaStage
 import com.repedelano.services.IdeaService
 import kotlinx.coroutines.CoroutineDispatcher
@@ -23,6 +24,11 @@ fun interface GetIdeaUseCase {
 fun interface GetIdeasUseCase {
 
     suspend fun getPage(pager: Pager): Result<IdeaResponseList>
+}
+
+fun interface SearchIdeaUseCase {
+
+    suspend fun search(pager: Pager, query: IdeaSearchRequest): Result<IdeaResponseList>
 }
 
 fun interface UpdateIdeaUseCase {
@@ -59,6 +65,15 @@ fun getIdeasUseCase(
 ) = GetIdeasUseCase { pager ->
     withContext(dispatcher) {
         ideaService.selectPage(pager)
+    }
+}
+
+fun searchIdeaUseCase(
+    dispatcher: CoroutineDispatcher,
+    ideaService: IdeaService
+) = SearchIdeaUseCase{pager, query ->
+    withContext(dispatcher) {
+        ideaService.search(pager, query)
     }
 }
 

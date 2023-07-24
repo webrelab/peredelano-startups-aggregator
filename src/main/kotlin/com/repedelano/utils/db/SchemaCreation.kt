@@ -39,10 +39,7 @@ object SchemaCreation {
     fun createSchema() {
         val env by inject<ApplicationEnvironment>(ApplicationEnvironment::class.java)
         transaction {
-            for (i in env.config.keys()) {
-                println(i)
-            }
-            if (env.config.property("ktor.environment").getString() == "test") {
+            if (env.config.property("ktor.dropdatabase").getString().toBoolean()) {
                 SchemaUtils.drop(*tables)
             }
             SchemaUtils.create(*tables)

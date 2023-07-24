@@ -9,19 +9,28 @@ import java.util.UUID
 
 @Serializable
 data class IdeaRequest(
-    val owner: Int,
-    val title: String?,
-    val tgLink: String?,
-    val scopes: List<String>?,
-    val problem: String,
-    val description: String?,
-    val businessModels: List<String>?,
-    val similarProjects: String?,
-    val targetAudience: String?,
-    val marketResearch: String?,
-    val businessPlan: String?,
-    val techStack: List<String>?,
-    val resources: String?,
+    val owner: Int? = null,
+    val title: String? = null,
+    val tgLink: String? = null,
+    val scopes: List<Int>? = null,
+    val problem: String? = null,
+    val description: String? = null,
+    val businessModels: List<Int>? = null,
+    val similarProjects: String? = null,
+    val targetAudience: String? = null,
+    val marketResearch: String? = null,
+    val businessPlan: String? = null,
+    val techStack: List<Int>? = null,
+    val resources: String? = null,
+)
+
+@Serializable
+data class IdeaSearchRequest(
+    val owner: Int?,
+    val queryString: String?,
+    val scopes: List<Int>,
+    val businessModels: List<Int>,
+    val techStack: List<Int>,
 )
 
 @Serializable
@@ -30,12 +39,12 @@ data class IdeaResponse(
     val id: UUID,
     val created: String,
     val updated: String,
-    val owner: Int,
+    val owner: Int?,
     val title: String?,
     val tgLink: String?,
     val scopes: MutableList<ScopeResponse>,
     val isFavorite: Boolean,
-    val problem: String,
+    val problem: String?,
     val description: String?,
     val businessModels: MutableList<BusinessModelResponse>,
     val similarProjects: String?,
@@ -46,6 +55,11 @@ data class IdeaResponse(
     val resources: String?,
     val status: IdeaStatus,
     val stage: IdeaStage,
+)
+
+@Serializable
+data class IdeaStageRequest(
+    val stage: IdeaStage
 )
 
 @Serializable

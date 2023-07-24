@@ -40,7 +40,10 @@ import com.repedelano.usecases.addBusinessModelUseCase
 import com.repedelano.usecases.addIdeaUseCase
 import com.repedelano.usecases.addProjectRoleUseCase
 import com.repedelano.usecases.addScopeUseCase
+import com.repedelano.usecases.addTechnologyUseCase
 import com.repedelano.usecases.addUserUseCase
+import com.repedelano.usecases.addVacancyUseCase
+import com.repedelano.usecases.getAllTechnologiesUseCase
 import com.repedelano.usecases.getBusinessModelByIdUseCase
 import com.repedelano.usecases.getBusinessModelsUseCase
 import com.repedelano.usecases.getIdeaUseCase
@@ -49,17 +52,24 @@ import com.repedelano.usecases.getProjectRoleByIdUseCase
 import com.repedelano.usecases.getProjectRolesUseCase
 import com.repedelano.usecases.getScopeByIdUseCase
 import com.repedelano.usecases.getScopesUseCase
+import com.repedelano.usecases.getTechnologyByIdUseCase
 import com.repedelano.usecases.getUserByIdUseCase
-import com.repedelano.usecases.getUsersUseCase
+import com.repedelano.usecases.getVacancyByIdUseCase
+import com.repedelano.usecases.searchIdeaUseCase
 import com.repedelano.usecases.searchProjectRoleUseCase
 import com.repedelano.usecases.searchScopeUseCase
+import com.repedelano.usecases.searchTechnologyUseCase
 import com.repedelano.usecases.searchUserUseCase
+import com.repedelano.usecases.searchVacancyUseCase
 import com.repedelano.usecases.updateBusinessModelUseCase
 import com.repedelano.usecases.updateIdeaStageUseCase
 import com.repedelano.usecases.updateProjectRoleUseCase
 import com.repedelano.usecases.updateIdeaUseCase
 import com.repedelano.usecases.updateScopeUseCase
+import com.repedelano.usecases.updateTechnologyUseCase
 import com.repedelano.usecases.updateUserUseCase
+import com.repedelano.usecases.updateVacancyStatusUseCase
+import com.repedelano.usecases.updateVacancyUseCase
 import com.repedelano.utils.db.DbFactory
 import com.repedelano.utils.db.DbTransaction
 import io.ktor.server.application.ApplicationEnvironment
@@ -109,6 +119,7 @@ private val useCases = module {
     factory { getIdeasUseCase(get(named(IO_DISPATCHER)), get())}
     factory { updateIdeaUseCase(get(named(IO_DISPATCHER)), get())}
     factory { updateIdeaStageUseCase(get(named(IO_DISPATCHER)), get())}
+    factory { searchIdeaUseCase(get(named(IO_DISPATCHER)), get())}
 
     // project role use-cases
     factory { addProjectRoleUseCase(get(named(IO_DISPATCHER)), get()) }
@@ -128,8 +139,21 @@ private val useCases = module {
     factory { addUserUseCase(get(named(IO_DISPATCHER)), get()) }
     factory { getUserByIdUseCase(get(named(IO_DISPATCHER)), get()) }
     factory { searchUserUseCase(get(named(IO_DISPATCHER)), get()) }
-    factory { getUsersUseCase(get(named(IO_DISPATCHER)), get()) }
     factory { updateUserUseCase(get(named(IO_DISPATCHER)), get()) }
+
+    // technology use-case
+    factory { addTechnologyUseCase(get(named(IO_DISPATCHER)), get()) }
+    factory { getTechnologyByIdUseCase(get(named(IO_DISPATCHER)), get()) }
+    factory { searchTechnologyUseCase(get(named(IO_DISPATCHER)), get()) }
+    factory { getAllTechnologiesUseCase(get(named(IO_DISPATCHER)), get()) }
+    factory { updateTechnologyUseCase(get(named(IO_DISPATCHER)), get()) }
+
+    // vacancy use-case
+    factory { addVacancyUseCase(get(named(IO_DISPATCHER)), get()) }
+    factory { getVacancyByIdUseCase(get(named(IO_DISPATCHER)), get()) }
+    factory { searchVacancyUseCase(get(named(IO_DISPATCHER)), get()) }
+    factory { updateVacancyUseCase(get(named(IO_DISPATCHER)), get()) }
+    factory { updateVacancyStatusUseCase(get(named(IO_DISPATCHER)), get()) }
 }
 
 private val repositories = module {
@@ -155,7 +179,6 @@ private val services = module {
             get(),
             get(),
             get(),
-            get(),
         )
     }
     single<ProjectRoleService> { ProjectRoleServiceImpl(get()) }
@@ -164,6 +187,7 @@ private val services = module {
     single<UserService> { UserServiceImpl(get()) }
     single<VacancyService> {
         VacancyServiceImpl(
+            get(),
             get(),
             get(),
             get(),

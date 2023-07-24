@@ -10,7 +10,7 @@ fun ResultRow.toVacancyResponse(
     projectRole: ProjectRoleResponse
 ): VacancyResponse {
 
-    return Vacancies.run {
+    return with(Vacancies) {
         VacancyResponse(
             id = get(id).value,
             ideaId = get(ideaId).value,

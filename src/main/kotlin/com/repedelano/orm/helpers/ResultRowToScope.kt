@@ -6,7 +6,7 @@ import com.repedelano.orm.scope.Scopes
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toScope(): ScopeResponse {
-    return Scopes.run {
+    return with(Scopes) {
         ScopeResponse(
             id = get(id).value,
             value = get(value),

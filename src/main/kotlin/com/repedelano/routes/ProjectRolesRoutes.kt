@@ -35,7 +35,7 @@ class ProjectRolesRoutes {
 
         fun clientPrWithId(id: Any?) = id?.let { "$PR/$id" } ?: PR
 
-        fun clientPrsWithRequest(query: Any?) = query?.let { "$PRS?$QUERY=$query" } ?: PRS
+        fun clientPrsSearch(query: Any?) = query?.let { "$PRS?$QUERY=$query" } ?: PRS
     }
 }
 
@@ -113,7 +113,8 @@ private fun Routing.updateProjectRole() {
                 ?.let { id ->
                     call.receiveNullable<ProjectRoleRequest>()
                         ?.let { projectRoleRequest ->
-                            updateProjectRoleUseCase.update(id, projectRoleRequest)
+                            val result = updateProjectRoleUseCase.update(id, projectRoleRequest)
+                            deconstructResult(this, result, HttpStatusCode.OK)
                         }
                         ?: call.respond(
                             HttpStatusCode.BadRequest,

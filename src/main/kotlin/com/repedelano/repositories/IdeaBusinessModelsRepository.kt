@@ -7,6 +7,9 @@ import com.repedelano.utils.db.DbTransaction
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -14,36 +17,22 @@ import java.util.UUID
 
 interface IdeaBusinessModelsRepository {
 
-    suspend fun insert(ideaId: UUID, businessModelId: Int): Result<Boolean>
-    suspend fun insert(ideaId: UUID, businessModelName: String): Result<Boolean>
+    suspend fun insert(ideaId: UUID, businessModelIds: Collection<Int>): Result<Boolean>
     suspend fun selectByIdeaId(ideaId: UUID): Result<List<ResultRow>>
     suspend fun delete(ideaId: UUID): Result<Boolean>
+    suspend fun delete(ideaId: UUID, businessModelIds: Collection<Int>): Result<Boolean>
 }
 
 class IdeaBusinessModelsRepositoryImpl(private val dbTransaction: DbTransaction) : IdeaBusinessModelsRepository {
 
-    override suspend fun insert(ideaId: UUID, businessModelId: Int): Result<Boolean> {
+    override suspend fun insert(ideaId: UUID, businessModelIds: Collection<Int>): Result<Boolean> {
         return dbTransaction.dbQuery {
             resultOf {
-                IdeaBusinessModels.insert {
-                    it[IdeaBusinessModels.ideaId] = ideaId
-                    it[IdeaBusinessModels.businessModelId] = businessModelId
-                }.resultedValues != null
-            }
-        }
-    }
-
-    override suspend fun insert(ideaId: UUID, businessModelName: String): Result<Boolean> {
-        return dbTransaction.dbQuery {
-            resultOf {
-                IdeaBusinessModels.insert {
-                    it[IdeaBusinessModels.ideaId] = ideaId
-                    it[businessModelId] = BusinessModels.slice(BusinessModels.id)
-                        .select(BusinessModels.value eq businessModelName)
-                        .map { row -> row[BusinessModels.id] }
-                        .firstOrNull()
-                        ?: throw java.lang.IllegalArgumentException("$businessModelName not found")
-                }.resultedValues != null
+                // TODO нужно сделать настройку БД для правильной работы batchInsesrt https://github.com/JetBrains/Exposed/wiki/DSL#batch-insert
+                IdeaBusinessModels.batchInsert(businessModelIds) { businessModelId ->
+                    this[IdeaBusinessModels.ideaId] = ideaId
+                    this[IdeaBusinessModels.businessModelId] = businessModelId
+                }.isNotEmpty()
             }
         }
     }
@@ -69,6 +58,23 @@ class IdeaBusinessModelsRepositoryImpl(private val dbTransaction: DbTransaction)
             resultOf {
                 IdeaBusinessModels.deleteWhere {
                     IdeaBusinessModels.ideaId eq ideaId
+                } > 0
+            }
+        }
+    }
+
+    override suspend fun delete(ideaId: UUID, businessModelIds: Collection<Int>): Result<Boolean> {
+        return dbTransaction.dbQuery {
+            resultOf {
+//                businessModelIds.map { businessModelId ->
+//                    IdeaBusinessModels.deleteWhere {
+//                        IdeaBusinessModels.ideaId eq ideaId and
+//                            (IdeaBusinessModels.businessModelId eq businessModelId)
+//                    }
+//                }.isNotEmpty()
+                IdeaBusinessModels.deleteWhere {
+                    IdeaBusinessModels.ideaId eq ideaId and
+                        (IdeaBusinessModels.businessModelId inList businessModelIds)
                 } > 0
             }
         }

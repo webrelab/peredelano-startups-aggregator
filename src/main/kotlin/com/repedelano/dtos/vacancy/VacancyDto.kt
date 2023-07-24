@@ -3,7 +3,6 @@ package com.repedelano.dtos.vacancy
 import com.repedelano.dtos.UUIDSerializer
 import com.repedelano.dtos.projectroles.ProjectRoleResponse
 import com.repedelano.dtos.technology.TechnologyResponse
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import java.util.UUID
 
@@ -11,15 +10,15 @@ import java.util.UUID
 data class VacancyRequest(
     @Serializable(with = UUIDSerializer::class)
     val ideaId: UUID,
-    val projectRole: String,
-    val techStack: List<String>,
+    val projectRoleId: Int,
+    val techStack: List<Int>,
     val description: String,
 )
 
 @Serializable
 data class VacancyResponse(
     val id: Int,
-    @Contextual
+    @Serializable(with = UUIDSerializer::class)
     val ideaId: UUID,
     val projectRole: ProjectRoleResponse,
     val status: VacancyStatus,
@@ -28,9 +27,24 @@ data class VacancyResponse(
 )
 
 @Serializable
+data class VacancySearchQuery(
+    @Serializable(with = UUIDSerializer::class)
+    val ideaId: UUID? = null,
+    val projectRole: Int? = null,
+    val techStack: List<Int>,
+    val description: String? = null,
+    val status: VacancyStatus? = null,
+)
+
+@Serializable
 data class VacancyResponseList(
     val vacancies: List<VacancyResponse>,
     val count: Int,
     val page: Int,
     val total: Int,
+)
+
+@Serializable
+data class VacancyRequestStatus(
+    val status: VacancyStatus
 )

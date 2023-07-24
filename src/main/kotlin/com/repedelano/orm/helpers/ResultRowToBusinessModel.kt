@@ -6,7 +6,7 @@ import com.repedelano.orm.businessmodel.BusinessModels
 import org.jetbrains.exposed.sql.ResultRow
 
 fun ResultRow.toBusinessModel(): BusinessModelResponse {
-    return BusinessModels.run {
+    return with(BusinessModels) {
         BusinessModelResponse(
             id = get(id).value,
             value = get(value),
